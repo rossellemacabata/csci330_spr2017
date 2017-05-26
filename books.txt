@@ -1,0 +1,8 @@
+ISBN	Title	Price	Stock	AuthorID1	Author1	AuthorID2	Author2	AuthorID3	Author3
+0073523321	Database System Concepts	140	0	silbera1	Abraham Silberschatz	korthh1	Henry Korth	sudarss2	S.Sudarshan
+1118063333	Operating System Concepts	147.55	0	silbera1	Abraham Silberschatz	galvinp1	Peter Galvin	gagneg1	Greg Gagne
+0321197844	An Introduction to Database Systems	150.83	0	datec1	C. J. Date
+1449328016	Database Design and Relational Theory: Normal Forms and All That Jazz (Theory in Practice)	35.01	0	datec1	C. J. Date
+0596100124	Database in Depth: Relational Theory for Practitioners	24.76	0	datec1	C. J. Date
+0321399420	"Databases, Types and the Relational Model"	8.25	0	datec1	C. J. Date	darwenh1	Hugh Darwen
+0571102506	Bridge Magic	7.99	0	darwenh1	Hugh Darwen

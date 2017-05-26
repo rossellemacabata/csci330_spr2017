@@ -1,0 +1,5 @@
+dburl=jdbc:mysql://mysql.cs.wwu.edu/macabar
+user=macabar
+password=1=HE6SnLEr#
+useSSL=true
+verifyServerCertificate=false

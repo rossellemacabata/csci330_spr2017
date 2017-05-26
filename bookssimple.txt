@@ -1,0 +1,3 @@
+ISBN	Title	Price	Stock	AuthorID1	Author1	AuthorID2	Author2	AuthorID3	Author3
+1234567890	A Title	12.49	0	smithj1	John Smith
+1234567891	Another Title	15.99	1	smithj1	John Smith	smithj2	James Smith	reedyc1	Chris Reedy
