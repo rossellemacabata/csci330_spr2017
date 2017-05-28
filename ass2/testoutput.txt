@@ -1,0 +1,113 @@
+--------------
+select database()
+--------------
+
+database()
+macabar
+--------------
+show tables
+--------------
+
+Tables_in_macabar
+author
+book
+bookauthor
+bookorder
+orderline
+shipment
+shipmentbook
+--------------
+show create table bookauthor
+--------------
+
+Table	Create Table
+bookauthor	CREATE TABLE `bookauthor` (\n  `isbn` varchar(13) NOT NULL,\n  `authorid` varchar(12) NOT NULL,\n  `bookauthornumber` int(11) NOT NULL,\n  PRIMARY KEY (`isbn`,`authorid`),\n  KEY `authorid` (`authorid`),\n  CONSTRAINT `bookauthor_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`),\n  CONSTRAINT `bookauthor_ibfk_2` FOREIGN KEY (`authorid`) REFERENCES `author` (`authorid`)\n) ENGINE=InnoDB DEFAULT CHARSET=latin1
+--------------
+select count(isbn), sum(bookprice), sum(stock) from book
+--------------
+
+count(isbn)	sum(bookprice)	sum(stock)
+7	514.39	0
+--------------
+select (select count(*) from author), (select count(*) from bookauthor)
+--------------
+
+(select count(*) from author)	(select count(*) from bookauthor)
+7	12
+--------------
+select authorid, authorname, count(bookauthornumber),
+	sum(bookauthornumber - (select min(bookauthornumber) from bookauthor)) as totalnum
+  from bookauthor natural join author
+  group by authorid, authorname
+  order by totalnum
+--------------
+
+authorid	authorname	count(bookauthornumber)	totalnum
+datec1	C. J. Date	4	0
+silbera1	Abraham Silberschatz	2	0
+darwenh1	Hugh Darwen	2	1
+korthh1	Henry Korth	1	1
+galvinp1	Peter Galvin	1	1
+gagneg1	Greg Gagne	1	2
+sudarss2	S.Sudarshan	1	2
+--------------
+select (select count(*) from bookorder), (select count(*) from orderline)
+--------------
+
+(select count(*) from bookorder)	(select count(*) from orderline)
+5	10
+--------------
+select sum(discount), sum(totalamount) from bookorder
+--------------
+
+sum(discount)	sum(totalamount)
+52.77	1850.67
+--------------
+select sum(numcopies), sum(numcopies * bookprice) from orderline
+--------------
+
+sum(numcopies)	sum(numcopies * bookprice)
+38	2012.45
+--------------
+select *
+  from bookorder B
+  where totalamount + discount != (select sum(numcopies * bookprice)
+									 from orderline O
+                                     where O.ordernumber = B.ordernumber)
+--------------
+
+ordernumber	customername	orderdate	discount	totalamount
+N201700001	John Doe	2017-04-24	10.00	15.99
+--------------
+select (select count(*) from shipment), (select count(*) from shipmentbook)
+--------------
+
+(select count(*) from shipment)	(select count(*) from shipmentbook)
+7	10
+--------------
+select ordernumber, shipmentid
+  from bookorder natural join shipment
+  where orderdate >= shipmentdate
+--------------
+
+--------------
+select sum(numcopies) from shipmentbook
+--------------
+
+sum(numcopies)
+36
+--------------
+select ordernumber, isbn, ordercopies, ifnull(shipcopies, 0) as shipcopies
+from (select ordernumber, isbn, numcopies as ordercopies
+        from bookorder natural join orderline) as orders
+     natural left join
+     (select ordernumber, isbn, sum(numcopies) as shipcopies
+        from shipment natural join shipmentbook
+        group by ordernumber, isbn) as shipments
+  where ordercopies != ifnull(shipcopies, 0)
+  order by ordernumber, isbn
+--------------
+
+ordernumber	isbn	ordercopies	shipcopies
+N201700003	0321399420	1	0
+N201700003	0571102506	1	0
