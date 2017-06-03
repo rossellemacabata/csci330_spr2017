@@ -17,7 +17,6 @@ import java.util.Date;
 
 class ConnectAndLoad {
     static Connection conn = null;
-    
     static final String DEFAULT_CONNECT_PARAMS = "connectparamsample.txt";
     static final String DEFAULT_BOOKS_PARAM = "books3.txt";
     static final String DEFAULT_ORDERS_PARAM = "orders3.txt";
@@ -134,21 +133,18 @@ class ConnectAndLoad {
         String booksParam = DEFAULT_BOOKS_PARAM;
         String ordersParam = DEFAULT_ORDERS_PARAM;
 
-
-        if (args.length == 1) {
+        if (args.length >= 1) {
             paramsFile = args[0];
         }
 
-        if (args.length == 2){
-        	paramsFile = args[0];
+        if (args.length >= 2){
         	booksParam = args[1];
         }
 
-        if (args.length == 3){
-        	paramsFile = args[0];
-        	booksParam = args[1];
-        	ordersParam = args[3];
+        if (args.length >= 3){
+        	ordersParam = args[2];
         }
+
         Properties connectprops = new Properties();
         connectprops.load(new FileInputStream(paramsFile)); 
 
@@ -174,7 +170,6 @@ class ConnectAndLoad {
         } catch (SQLException ex) {
             System.out.printf("SQLException: %s%nSQLState: %s%nVendorError: %s%n",
                     ex.getMessage(), ex.getSQLState(), ex.getErrorCode());
-            // This line, if uncommented, will produce a stack trace
             ex.printStackTrace();
         }
     }
@@ -352,7 +347,6 @@ class ConnectAndLoad {
             	bookauthor_stmt.executeUpdate();
             }
             bookauthor_stmt.close();
-           
         }     
     }
 }

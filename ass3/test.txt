@@ -1,0 +1,150 @@
+Zellie Macabata
+CSCI 330 Spring 2017
+Tested queries
+
+These are all the queries I tested in workbench.
+I should have piped my outputs to a textfile so you can see my results (for printing and formatting in Java),
+but I forgot that we needed a test.txt file to submit, in which I apologize.
+
+I also wasn't sure how to share what my results were from workbench when I would run the queries,
+but you can tell that a lot of queries have several mistakes in them and I've created multiple queries 
+for the same command...
+
+
+select ordernumber, orderdate, customername
+from macabar.bookorder 
+where ordernumber like 'N2017%'
+order by orderdate, ordernumber;
+
+select * from macabar.orderline;
+
+select * from macabar.bookorder;
+
+select * from macabar.book;
+
+
+select A.ordernumber, A.linenumber, A.numcopies, A.bookprice, B.isbn, B.title, C.customername, C.orderdate, C.totalamount
+from macabar.orderline as A 
+inner join macabar.book as B 
+on A.isbn = B.isbn
+inner join macabar.bookorder as C 
+on A.ordernumber = C.ordernumber
+where A.ordernumber = 'N201700002'
+order by A.linenumber;
+
+select A.ordernumber, A.shipmentid, A.shipmentdate, B.customername, B.orderdate, C.numcopies, C.isbn, D.title
+from macabar.shipment as A
+inner join macabar.bookorder as B
+on B.ordernumber = A.ordernumber
+inner join macabar.shipmentbook as C
+on A.shipmentid = C.shipmentid
+inner join macabar.book as D
+on C.isbn = D.isbn
+where B.ordernumber = 'N201700003';
+
+select distinct A.isbn, A.title, B.bookprice, B.numcopies, B.ordernumber, C.orderdate, C.customername, 
+group_concat(author.authorname separator ', ') as authors
+from macabar.author
+right outer join macabar.bookauthor
+on author.authorid = bookauthor.authorid
+left outer join macabar.book as A
+on bookauthor.isbn = A.isbn
+left outer join macabar.orderline as B
+on B.isbn = A.isbn
+left outer join macabar.bookorder as C
+on C.ordernumber = B.ordernumber
+where A.isbn = '0387848576'
+group by B.numcopies, A.isbn, B.ordernumber
+order by C.orderdate, C.ordernumber;
+
+select distinct A.authorname, A.authorid, sum(C.numcopies*C.bookprice) as total
+from macabar.author as A
+inner join macabar.bookauthor as D
+on A.authorid = D.authorid
+inner join macabar.book as B
+on D.isbn = B.isbn
+inner join macabar.orderline as C
+on C.isbn = B.isbn
+group by A.authorid, B.isbn
+order by total desc limit 5;
+
+select distinct A.authorname, A.authorid, sum(B.numcopies*B.bookprice) as total
+from macabar.orderline as B
+inner join macabar.bookauthor as C
+	on C.isbn = B.isbn
+inner join macabar.author as A
+	on A.authorid = C.authorid
+where C.authorid in (
+	select C.authorid
+    from macabar.bookauthor as D
+    inner join macabar.book as C
+    on C.isbn = D.isbn
+    inner join macabar.orderline
+    on orderline.isbn = C.isbn
+    inner join macabar.author as A
+    on D.authorid = A.authorid)
+group by A.authorid, A.authorname
+order by total desc, A.authorname limit 5;
+
+select B.ordernumber, A.shipmentid, A.shipmentdate, B.customername, B.orderdate, C.numcopies, C.isbn, D.title
+from macabar.shipment as A
+right outer join macabar.bookorder as B
+on B.ordernumber = A.ordernumber
+left outer join macabar.shipmentbook as C
+on A.shipmentid = C.shipmentid
+left outer join macabar.book as D
+on C.isbn = D.isbn
+where B.ordernumber = 'N201700003';
+
+select A.ordernumber, A.orderdate, A.customername
+from macabar.bookorder as A
+right outer join macabar.shipment as B
+on isnull(B.ordernumber,0);
+    
+select A.ordernumber, A.customername, A.orderdate,
+	B.numcopies as canship, E.numcopies as shipped,
+    C.stock as available, C.isbn, C.title
+from macabar.bookorder as A
+join macabar.orderline as B on A.ordernumber = B.ordernumber
+join macabar.shipment as D on A.ordernumber = D.ordernumber
+join macabar.shipmentbook as E on D.shipmentid = E.shipmentid
+join macabar.book as C on E.isbn = C.isbn
+where E.numcopies < B.numcopies and C.stock > 0
+order by A.orderdate, A.ordernumber;
+
+select ordernumber, customername, orderdate,
+	B.numcopies as canship, ifnull(E.numcopies,0) as shipped,
+    stock, isbn, title
+    from (
+		select A.ordernumber, A.customername, A.orderdate,
+			B.numcopies, C.isbn, C.title, C.stock
+            from macabar.bookorder as A
+            inner join macabar.orderline as B on A.ordernumber = B.ordernumber
+            inner join macabar.book as C on B.isbn = C.isbn) as B
+	left outer join (
+		select A.shipmentid, B.numcopies
+        from macabar.shipment as A
+        inner join macabar.shipmentbook as B on A.shipmentid = B.shipmentid) as E
+       on (E.numcopies < B.numcopies and stock > 0) and (E.numcopies is null and stock > 0)
+       order by orderdate and ordernumber;
+
+select ordernumber, customername, orderdate,
+	B.numcopies as canship, ifnull(E.numcopies,0) as shipped,
+    stock, isbn, title
+from (macabar.bookorder join macabar.orderline using (bookorder.ordernumber)) join macabar.book using (isbn))
+left outer join macabar.shipment join macabar.shipmentbook using (shipmentid)
+on (shipmentbook.numcopies < orderline.numcopies and stock > 0) or (shipment.numcopies is null and stock > 0)
+order by orderdate and ordernumber;
+
+    
+select ordernumber, orderdate, customername, isbn, title, stock, shipped, canship
+from (
+	select ordernumber, orderdate, customername, orderline.isbn, orderline.numcopies as canship,
+		coalesce(shipmentbook.numcopies,0) as shipped
+        from (macabar.bookorder natural join macabar.orderline) left join 
+			(macabar.shipment natural join macabar.shipmentbook) using (ordernumber,isbn)
+		order by orderline.isbn) as A
+natural join macabar.book 
+where stock > 0 and A.canship - A.shipped > 0
+order by orderdate, ordernumber;
+            
